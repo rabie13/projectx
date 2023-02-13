@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ProjectX| {{ project.title }}{% endblock %}
+
+{% block stylesheet %}
+{% endblock %}
+
+{% block body %}
+<style>
+.header-title {
+    background: #29618d;
+    color: #FFF;
+    padding: 7px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+</style>
+<div class="container">
+
+    <div class="card">
+        <div class="card-body"> 
+            <h4 class="header-title">{{ project.title }}</h4>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <p><b>Status :</b> 
+                    {% if project.status == 'In progress' %} {% set class = "bg-primary" %}
+                    {% elseif project.status == 'Done'  %} {% set class = "bg-success" %}
+                    {% else %} {% set class = "bg-danger" %}
+                    {% endif %}
+                    <span class="badge {{ class }}">{{ project.status }}</span>
+                    </p>
+                    <p><b>Created :</b> on {{ project.createdAt|date('Y-m-d H:i') ~ ' by ' ~ project.createdBy.fullname }}</p>
+                    <p><b>Description :</b> <br>
+                        {{ project.description}}
+                    </p>
+                    <p><b>Number of tasks :</b> {{ project.tasks}}</p>
+                    <p><b>File name or url :</b></b> {{ project.url }}
+                    <br>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_project_edit', {'id' : project.id }) }}" class="btn btn-sm btn-secondary mt-4">Update</a>
+                    <a href="javascript:void(0)" class="btn btn-sm btn-danger btn-delete mt-4">Delete</a>
+                    <form action="{{ path('app_project_delete', {'id' : project.id }) }}" method="post" id="deleteForm">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_project') }}" >
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="col-6">
+                    <img src="{{ asset('assets/images/projects/' ~ project.image )}}" class="img-fluid w-100" alt="image not found">
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %} 
+    <script>
+        $('.btn-delete').click(function(){
+            if (confirm("Are you sure ?")) {
+                $('#deleteForm').submit();
+            }
+        })
+    </script>
+{% endblock %}
