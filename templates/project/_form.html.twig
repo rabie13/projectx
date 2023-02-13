@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ProjectX{% endblock %}
+
+{% block body %}
+
+<div class="container">
+
+    <div class="card">
+        <div class="card-body"> 
+            <h4 class="header-title">
+                {% if project.id %} Edit {{ project.title }}
+                {% else %}   Create a new project
+                {% endif %}    
+            </h4>
+            {{ form_start(form, {'attr' : {'id' : 'project-form' }})}}
+            <div class="row mt-5">
+                <div class="col-6">
+                    {{ form_row(form.title)}}
+                </div>
+                <div class="col-6">
+                    {{ form_row(form.url)}}
+                </div>
+                <div class="col-3">
+                    {{ form_row(form.tasks)}}
+                </div>
+                <div class="col-3">
+                    {{ form_row(form.status)}}
+                </div>
+                <div class="{% if project.id %}col-4{% else %}col-6{% endif %} ">
+                    {% set required = project.id == null ? true : false %}
+                    {{ form_row(form.photo, { 'required' : required })}}
+                </div>
+                {% if project.id %}
+                <div class="col-2">
+                    <img src="{{ asset('assets/images/projects/' ~ project.image )}}" class="img-fluid rounded" alt="">
+                </div>
+                {% endif %}
+
+                <div class="col-12">
+                    {{ form_row(form.description)}}
+                </div>
+            </div>
+            <button class="btn btn-secondary">
+                Submit
+            </button>
+            {{ form_end(form)}}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

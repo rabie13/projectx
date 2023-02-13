@@ -1,0 +1,69 @@
+{{ form_start(form, {'attr' : {'id' : 'user-form'}}) }}
+<input type="hidden" name="imageBlob" id="imageBlob" value="">
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+        {% if user.id %} Update {% if app.user == user %}my{% else %} user{% endif %} credentials
+        {% else %} Create a new user
+        {% endif %}
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-12">
+            {{ form_row(form.email)}}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.fullname) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.roles)}}
+        </div>
+        <div class="col-12">
+            {% set required = user.id == null ? true : false %}
+            {% set label = user.id == null ? 'New password' : 'Update password' %}
+
+            {{ form_row(form.plainPassword.first, {'label' : label, 'attr' : {'required' : required}} )}}
+        </div>
+         <div class="col-12">
+            {{ form_row(form.plainPassword.second, {'attr' : {'required' : required}} )}}
+        </div>
+        <div class="col-12">
+            {{ form_row(form.photo) }}
+        </div>
+
+        <div class="col-12 d-none" id="image-preview-section">
+            <div class="row gx-0">
+                <div class="col-8"><img id="image-preview" src="" class="w-100"></div>
+                <div class="col-4">
+                    <div class="preview"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Save</button>
+</div>
+{{ form_end(form)}}
+
+<script src="{{ asset('assets/js/cropper.js') }}" ></script>
+<script>
+    document.getElementById('user-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.checkValidity()) {
+        let timeout = 0;
+
+        if ($('#user_photo').get(0).files.length > 0) {
+            getBlob();
+            timeout = 1000;
+        }
+        setTimeout(function(){
+            $('#user-form').submit();
+        }, timeout);
+    }
+    }, false);
+
+</script>

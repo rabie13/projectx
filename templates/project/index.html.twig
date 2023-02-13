@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ProjectX{% endblock %}
+
+{% block body %}
+<style>
+
+.form-control:focus {
+  box-shadow: none;
+}
+
+.form-control-underlined {
+  border-width: 0;
+  border-bottom-width: 1px;
+  border-radius: 0;
+  padding-left: 0;
+}
+
+.form-control::placeholder {
+  font-size: 0.95rem;
+  color: #aaa;
+  font-style: italic;
+}
+</style>
+<div class="container">
+
+    <form action="{{ path('app_project')}}" method="get" id="search-form">
+    <div class="row mt-5">
+        <div class="col-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                    <input id="exampleFormControlInput1" type="text" name="name" placeholder="Project name" 
+                        class="form-control form-control-underlined clear" value="{{ app.request.query.get('name', '') }}">
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                        <select id="form_need" name="status" class="form-control clear" data-error="Please specify your need.">
+                            <option value="">Project status</option>
+                            <option value="In progress" {% if app.request.query.get('status') == 'In progress' %} selected {% endif %}>In progress</option>
+                            <option value="Done" {% if app.request.query.get('status') == 'Done' %} selected {% endif %}>Done</option>
+                            <option value="Blocked" {% if app.request.query.get('status') == 'Blocked' %} selected {% endif %}>Blocked</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body" style="display:flex; flex-direction: row;">
+                    <div class="form-group mb-2 w-100">
+                    <input id="exampleFormControlInput1" type="text" name="filename" placeholder="File name or url" 
+                    class="form-control form-control-underlined clear" value="{{ app.request.query.get('filename', '') }}">
+                    </div>
+
+                    <button class="btn btn-secondary" style="margin-left: 32px;">
+                    Search</button>
+
+                    <button class="btn btn-secondary btn-reset" type="reset" style="margin-left: 14px;">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+
+    <div class="row mt-5">
+        {% for project in projects %}
+
+        <div class="col-4 mb-3">
+            <div class="card project-item" style="width: 18rem;" data-title="{{ project.title }}">
+                <a href="{{ path('app_project_show', {'id' : project.id }) }}">
+                <img src="{{ asset('assets/images/projects/' ~ project.image ) }}" class="card-img-top" alt="Not found">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title text-center">
+                        <a href="{{ path('app_project_show', {'id' : project.id }) }}" class="text-decoration-none text-dark"> {{ project.title }} </a>
+                    </h5>
+                    <p class="card-text">{{ project.description|u.truncate(70, '...')  }}</p>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_project_edit', {'id' : project.id }) }}" class="btn btn-sm btn-secondary">Update</a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-sm btn-delete float-end" data-id="{{ project.id }}">Delete</a>
+                    <form id="deleteForm{{project.id}}" action="{{ path('app_project_delete', {'id' : project.id }) }}" method="post">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_project') }}" >
+                    </form>
+                    {% endif %}
+                    <hr>
+                    <small class="text-muted">last updated {{ project.updatedAt|ago}}</small>   
+                    <small class="text-muted float-end">{{ project.tasks }} tasks</small>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <p class="text-muted">There are no projects found. <a href="{{ path('app_project_add')}}">create one</a>!</p>
+        {% endfor %}
+
+         <div class="navigation mx-auto mt-4">
+            {{ knp_pagination_render(projects) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $('.btn-delete').click(function(){
+        let id = $(this).attr('data-id');
+        if (confirm("Are you sure ?")) {
+            $('#deleteForm'+id).submit();
+        }
+    })
+
+    $('.btn-reset').click(function(){
+        $('.clear').attr('value', '');
+        $('select.clear').find('option:selected').attr('selected', false)
+        $('select.clear').find('option:first').attr('selected', 'selected')
+    })
+
+    $('.search-input').keyup(function(){
+		let val = $(this).val()
+		if (val != ""){
+			$('.project-item').each(function(){
+				if ($(this).attr('data-title').includes(val)){
+					$(this).removeClass('d-none');
+				}else{
+					$(this).addClass('d-none');
+				}
+			})
+		}else{
+			$('.bug-item').removeClass('d-none');
+		}
+	})
+</script>
+{% endblock %}
